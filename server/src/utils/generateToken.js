@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || "abc";
+const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "abcd";
 const ACCESS_EXPIRES = process.env.ACCESS_TOKEN_EXPIRES || "15m";
 const REFRESH_EXPIRES = process.env.REFRESH_TOKEN_EXPIRES || "7d";
 
@@ -31,5 +31,5 @@ module.exports = {
 	signRefresh,
 	verifyAccess,
 	verifyRefresh,
-	hashToken,
+	// hashToken,
 };

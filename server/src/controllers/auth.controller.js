@@ -1,11 +1,11 @@
 const bcrypt = require("bcryptjs");
-const User = require("../models/User");
+const User = require("../models/user.model");
 const {
 	signAccess,
 	signRefresh,
 	hashToken,
 	verifyRefresh,
-} = require("../utils/token");
+} = require("../utils/generateToken");
 
 // Cookie helpers
 const cookieOptions = {
