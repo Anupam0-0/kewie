@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const RefreshTokenSchema = new mongoose.Schema({
 	tokenHash: { type: String, required: true },
@@ -13,7 +14,7 @@ const UserSchema = new mongoose.Schema(
 	{
 		name: { type: String, required: true },
 		email: { type: String, unique: true, required: true },
-		passwordHash: { type: String, required: true },
+		password: { type: String, required: true },
 		phone: { type: String, required: true },
 		branch: String,
 		role: { type: String, enum: ["Student", "Admin"] },
@@ -26,12 +27,13 @@ const UserSchema = new mongoose.Schema(
 
 UserSchema.pre("save", async function (next) {
 	if (!this.isModified("password")) return next();
-	const salt = await bcrypt.genSalt(12);
-	this.password = await bcrypt.hash(this.password, salt);
+	// const salt = await bcrypt.genSalt(12);
+	this.password = await bcrypt.hash(this.password, 12);
 	next();
 });
 
 UserSchema.methods.comparePassword = async function (candidate) {
+	// console.log(candidate, this.password);
 	return bcrypt.compare(candidate, this.password);
 };
 
@@ -43,4 +45,8 @@ UserSchema.methods.toJSON = function () {
 	return obj;
 };
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = {
+	User: mongoose.model("User", UserSchema),
+	RefreshTokenSchema,
+	UserSchema
+};

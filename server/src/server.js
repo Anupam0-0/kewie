@@ -1,49 +1,80 @@
+// Import required modules
 const express = require("express");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const rateLimit = require("express-rate-limit");
+
+// Import custom modules
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth.route");
 const itemRoutes = require("./routes/item.route");
 // const chatRoutes = require("./routes/chat.route");
 // const protectedRoutes = require("./routes/protected");
 const { errorHandler } = require("./middlewares/error.middleware");
-const rateLimit = require("express-rate-limit");
+const { protect } = require("./middlewares/auth.middleware");
 
+// Load environment variables from .env file
 dotenv.config();
+
+// Connect to MongoDB database
 connectDB();
 
+// Initialize Express app
 const app = express();
-const PORT = 3000 || process.env.PORT;
 
-// Basic security middleware
+// Set server port
+const PORT = process.env.PORT || 3000;
+
+// Middleware: Enable CORS for all routes
 app.use(cors());
+
+// Middleware: Set security-related HTTP headers
 app.use(helmet());
+
+// Middleware: Parse incoming JSON requests
 app.use(express.json());
+
+// Middleware: Parse cookies from incoming requests
 app.use(cookieParser());
 
-// Logging in dev only.
+// Middleware: HTTP request logger (only in development)
 if (process.env.NODE_ENV !== "production") {
 	app.use(morgan("dev"));
 }
 
-// Rate limiter for auth endpoints
+// Rate limiter for authentication endpoints to prevent brute-force attacks
 const authLimiter = rateLimit({
-	windowMs: 60 * 1000, // 1 minute
-	max: 20,
+	windowMs: 60 * 1000, // 1 minute window
+	max: 20, // limit each IP to 20 requests per windowMs
 	message: { error: "Too many requests, try again later." },
 });
 app.use("/api/auth", authLimiter);
 
-// // Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/items", itemRoutes);
-// // app.use("/api/chats", chatRoutes);
+// Routes
+app.use("/api/auth", authRoutes); // Authentication routes
+app.use("/api/listings", itemRoutes); // Item/listing routes
+// app.use("/api/chats", chatRoutes); // Chat routes (uncomment if needed)
+// app.use("/api/protected", protectedRoutes); // Protected routes (uncomment if needed)
 
+// Test route for backend status
+app.get("/", (req, res) => {
+	console.log("Hi from Backend!");
+	res.send("Hi from Backend!");
+});
 
-// // Global error handler
+// Example protected route
+app.get("/protect", protect, (req, res) => {
+	console.log("Sup from protected Backend!");
+	res.send("Sup from protected Backend!");
+});
+
+// Global error handler middleware
 app.use(errorHandler);
 
-app.listen(PORT, console.log(`App is running in PORT : ${PORT}`));
+// Start the server
+app.listen(PORT, () => {
+	console.log(`Server is running on PORT: ${PORT}`);
+});

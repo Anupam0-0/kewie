@@ -1,4 +1,5 @@
 
 .env
 node_modules/
-randomcodes.js
+randomcodes.md
+*.tbd.js
