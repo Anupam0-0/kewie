@@ -1,26 +1,16 @@
 const { Item, ItemImage } = require("../models/item.model");
+const { 
+	itemCreateSchema, 
+	itemUpdateSchema, 
+	itemStatusUpdateSchema, 
+	itemFiltersSchema 
+} = require("../utils/validationSchemas");
 
 // Create a new item
 const createItem = async (req, res) => {
   try {
+    // Data is already validated by Zod middleware
     const { title, description, price, category, condition, location, negotiable } = req.body;
-
-    // Validate required fields
-    if (!title || !price || !category || !condition) {
-      return res.status(400).json({ 
-        message: "Missing required fields: title, price, category, condition" 
-      });
-    }
-
-    // Validate price
-    if (price <= 0) {
-      return res.status(400).json({ message: "Price must be greater than 0" });
-    }
-
-    // Validate category array
-    if (!Array.isArray(category) || category.length === 0) {
-      return res.status(400).json({ message: "At least one category is required" });
-    }
 
     const item = await Item.create({
       user: req.user._id,

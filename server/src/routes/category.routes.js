@@ -12,6 +12,14 @@ const {
 } = require("../controllers/category.controller");
 const { protect } = require("../middlewares/auth.middleware");
 const { requireRole } = require("../middlewares/rbac.middleware");
+const { validateBody, validateParams, validateQuery } = require("../middlewares/validation.middleware");
+const { 
+	categoryCreateSchema, 
+	categoryUpdateSchema, 
+	bulkCategoryCreateSchema,
+	categoryIdParamSchema,
+	searchSchema 
+} = require("../utils/validationSchemas");
 
 const router = express.Router();
 
@@ -28,7 +36,7 @@ router.get("/", getAllCategories);
  * @desc    Search categories
  * @access  Public
  */
-router.get("/search", searchCategories);
+router.get("/search", validateQuery(searchSchema), searchCategories);
 
 /**
  * @route   GET /stats
@@ -49,7 +57,7 @@ router.get("/popular", getPopularCategories);
  * @desc    Get a single category by ID
  * @access  Public
  */
-router.get("/:categoryId", getCategoryById);
+router.get("/:categoryId", validateParams(categoryIdParamSchema), getCategoryById);
 
 // Admin-only routes
 /**
@@ -57,27 +65,27 @@ router.get("/:categoryId", getCategoryById);
  * @desc    Create a new category
  * @access  Private (Admin only)
  */
-router.post("/", protect, requireRole("Admin"), createCategory);
+router.post("/", protect, requireRole("Admin"), validateBody(categoryCreateSchema), createCategory);
 
 /**
  * @route   POST /bulk
  * @desc    Bulk create categories
  * @access  Private (Admin only)
  */
-router.post("/bulk", protect, requireRole("Admin"), bulkCreateCategories);
+router.post("/bulk", protect, requireRole("Admin"), validateBody(bulkCategoryCreateSchema), bulkCreateCategories);
 
 /**
  * @route   PUT /:categoryId
  * @desc    Update a category
  * @access  Private (Admin only)
  */
-router.put("/:categoryId", protect, requireRole("Admin"), updateCategory);
+router.put("/:categoryId", protect, requireRole("Admin"), validateParams(categoryIdParamSchema), validateBody(categoryUpdateSchema), updateCategory);
 
 /**
  * @route   DELETE /:categoryId
  * @desc    Delete a category
  * @access  Private (Admin only)
  */
-router.delete("/:categoryId", protect, requireRole("Admin"), deleteCategory);
+router.delete("/:categoryId", protect, requireRole("Admin"), validateParams(categoryIdParamSchema), deleteCategory);
 
 module.exports = router;

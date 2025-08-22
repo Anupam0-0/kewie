@@ -7,6 +7,12 @@ const {
 	hashToken,
 	verifyRefresh,
 } = require("../utils/generateToken");
+const { 
+	userRegistrationSchema, 
+	userLoginSchema, 
+	userUpdateSchema, 
+	changePasswordSchema 
+} = require("../utils/validationSchemas");
 
 // Cookie helpers
 const cookieOptions = {
@@ -18,26 +24,9 @@ const cookieOptions = {
 
 exports.register = async (req, res) => {
 	try {
+		// Data is already validated by Zod middleware
 		const { name, email, password, phone, branch } = req.body;
 		
-		// Validate required fields
-		if (!name || !email || !password || !phone) {
-			return res.status(400).json({ 
-				message: "Missing required fields: name, email, password, phone" 
-			});
-		}
-
-		// Validate email format
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(email)) {
-			return res.status(400).json({ message: "Please enter a valid email address" });
-		}
-
-		// Validate password strength
-		if (password.length < 6) {
-			return res.status(400).json({ message: "Password must be at least 6 characters long" });
-		}
-
 		// Check if user already exists
 		const exists = await User.findOne({ email: email.toLowerCase() });
 		if (exists) {
@@ -81,15 +70,12 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
 	try {
+		// Data is already validated by Zod middleware
 		const { email, password } = req.body;
-		
-		if (!email || !password) {
-			return res.status(400).json({ message: "Email and password are required" });
-		}
 
 		const user = await User.findOne({ email: email.toLowerCase() });
 		if (!user) {
-			return res.status(401).json({ message: "Invalid credentials" });
+			return res.status(401).json({ message: "Email Not Found! Try registering first" });
 		}
 
 		// Check if user is active
@@ -99,7 +85,7 @@ exports.login = async (req, res) => {
 
         const isPasswordValid = await user.comparePassword(password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: "Invalid credentials" });
+            return res.status(401).json({ message: "Incorrect Password! Try Again!" });
         }
 
 		// Update last login and login count

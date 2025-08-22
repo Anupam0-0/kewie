@@ -14,6 +14,14 @@ const {
 	getItemStats,
 } = require("../controllers/item.controller");
 const { protect } = require("../middlewares/auth.middleware");
+const { validateBody, validateQuery, validateParams } = require("../middlewares/validation.middleware");
+const { 
+	itemCreateSchema, 
+	itemUpdateSchema, 
+	itemStatusUpdateSchema, 
+	itemFiltersSchema,
+	itemIdParamSchema 
+} = require("../utils/validationSchemas");
 
 const router = express.Router();
 
@@ -23,7 +31,7 @@ const router = express.Router();
  * @desc    Get all item listings with filtering, sorting, and pagination
  * @access  Public
  */
-router.get("/", getItems);
+router.get("/", validateQuery(itemFiltersSchema), getItems);
 
 /**
  * @route   GET /search
@@ -65,7 +73,7 @@ router.get("/user/:userId", getItemsByUser);
  * @desc    Get a single item by its ID
  * @access  Public
  */
-router.get("/:itemId", getItemById);
+router.get("/:itemId", validateParams(itemIdParamSchema), getItemById);
 
 // Protected routes
 /**
@@ -73,28 +81,28 @@ router.get("/:itemId", getItemById);
  * @desc    Create a new item listing
  * @access  Private (requires authentication)
  */
-router.post("/", protect, createItem);
+router.post("/", protect, validateBody(itemCreateSchema), createItem);
 
 /**
  * @route   PUT /:itemId
  * @desc    Update an existing item listing
  * @access  Private (requires authentication)
  */
-router.put("/:itemId", protect, updateItemById);
+router.put("/:itemId", protect, validateParams(itemIdParamSchema), validateBody(itemUpdateSchema), updateItemById);
 
 /**
  * @route   DELETE /:itemId
  * @desc    Delete an item listing
  * @access  Private (requires authentication)
  */
-router.delete("/:itemId", protect, deleteItemById);
+router.delete("/:itemId", protect, validateParams(itemIdParamSchema), deleteItemById);
 
 /**
  * @route   PATCH /:itemId/status
  * @desc    Update status of an item
  * @access  Private (requires authentication)
  */
-router.patch("/:itemId/status", protect, updateStatusById);
+router.patch("/:itemId/status", protect, validateParams(itemIdParamSchema), validateBody(itemStatusUpdateSchema), updateStatusById);
 
 /**
  * @route   POST /:itemId/report

@@ -12,6 +12,13 @@ const {
 	moveToCart,
 } = require("../controllers/wishlist.controller");
 const { protect } = require("../middlewares/auth.middleware");
+const { validateBody, validateParams } = require("../middlewares/validation.middleware");
+const { 
+	wishlistAddSchema, 
+	bulkWishlistSchema,
+	itemIdParamSchema,
+	categoryIdParamSchema 
+} = require("../utils/validationSchemas");
 
 const router = express.Router();
 
@@ -37,42 +44,42 @@ router.get("/stats", getWishlistStats);
  * @desc    Get wishlist items by category
  * @access  Private (requires authentication)
  */
-router.get("/category/:categoryId", getWishlistByCategory);
+router.get("/category/:categoryId", validateParams(categoryIdParamSchema), getWishlistByCategory);
 
 /**
  * @route   GET /check/:itemId
  * @desc    Check if item is in wishlist
  * @access  Private (requires authentication)
  */
-router.get("/check/:itemId", checkWishlistStatus);
+router.get("/check/:itemId", validateParams(itemIdParamSchema), checkWishlistStatus);
 
 /**
  * @route   POST /
  * @desc    Add item to wishlist
  * @access  Private (requires authentication)
  */
-router.post("/", addToWishlist);
+router.post("/", validateBody(wishlistAddSchema), addToWishlist);
 
 /**
  * @route   POST /bulk
  * @desc    Bulk add items to wishlist
  * @access  Private (requires authentication)
  */
-router.post("/bulk", bulkAddToWishlist);
+router.post("/bulk", validateBody(bulkWishlistSchema), bulkAddToWishlist);
 
 /**
  * @route   DELETE /:itemId
  * @desc    Remove item from wishlist
  * @access  Private (requires authentication)
  */
-router.delete("/:itemId", removeFromWishlist);
+router.delete("/:itemId", validateParams(itemIdParamSchema), removeFromWishlist);
 
 /**
  * @route   DELETE /bulk
  * @desc    Bulk remove items from wishlist
  * @access  Private (requires authentication)
  */
-router.delete("/bulk", bulkRemoveFromWishlist);
+router.delete("/bulk", validateBody(bulkWishlistSchema), bulkRemoveFromWishlist);
 
 /**
  * @route   DELETE /clear
@@ -86,6 +93,6 @@ router.delete("/clear", clearWishlist);
  * @desc    Move wishlist item to cart
  * @access  Private (requires authentication)
  */
-router.post("/:itemId/move-to-cart", moveToCart);
+router.post("/:itemId/move-to-cart", validateParams(itemIdParamSchema), moveToCart);
 
 module.exports = router;

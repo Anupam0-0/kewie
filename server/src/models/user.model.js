@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema(
 			required: true,
 			trim: true,
 			minlength: 2,
-			maxlength: 50
+			maxlength: 50,
 		},
 		email: {
 			type: String,
@@ -35,7 +35,7 @@ const UserSchema = new mongoose.Schema(
 		password: {
 			type: String,
 			required: true,
-			minlength: 6
+			minlength: 6,
 		},
 		phone: {
 			type: String,
@@ -50,16 +50,16 @@ const UserSchema = new mongoose.Schema(
 		},
 		branch: {
 			type: String,
-			trim: true
+			trim: true,
 		},
 		role: {
 			type: String,
 			enum: ["Student", "Admin"],
-			default: "Student"
+			default: "Student",
 		},
 		isVerified: {
 			type: Boolean,
-			default: false
+			default: false,
 		},
 		avatar: {
 			type: String,
@@ -73,11 +73,11 @@ const UserSchema = new mongoose.Schema(
 		lastLogin: Date,
 		loginCount: {
 			type: Number,
-			default: 0
+			default: 0,
 		},
 		isActive: {
 			type: Boolean,
-			default: true
+			default: true,
 		},
 
 		//  Add verification fields
@@ -94,31 +94,33 @@ const UserSchema = new mongoose.Schema(
 UserSchema.pre("save", async function (next) {
 	if (!this.isModified("password")) return next();
 	// const salt = await bcrypt.genSalt(12);
-	this.password = await bcrypt.hash(this.password, 12);
+	// this.password = await bcrypt.hash(this.password, 12);
 	next();
 });
 
 UserSchema.methods.comparePassword = async function (candidate) {
-	// console.log(candidate, this.password);
-	return bcrypt.compare(candidate, this.password);
+	console.log("testing raw password why? idk")
+	console.log(candidate, this.password);
+	// return bcrypt.compare(candidate, this.password);
+	if (candidate == this.password) return true;
+	else return false;
 };
 
 // Add method to generate verification token
-UserSchema.methods.generateVerificationToken = function() {
-	const token = require('crypto').randomBytes(32).toString('hex');
+UserSchema.methods.generateVerificationToken = function () {
+	const token = require("crypto").randomBytes(32).toString("hex");
 	this.emailVerificationToken = token;
 	this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 	return token;
 };
 
 // Add method to generate password reset token
-UserSchema.methods.generatePasswordResetToken = function() {
-	const token = require('crypto').randomBytes(32).toString('hex');
+UserSchema.methods.generatePasswordResetToken = function () {
+	const token = require("crypto").randomBytes(32).toString("hex");
 	this.passwordResetToken = token;
 	this.passwordResetExpires = Date.now() + 60 * 60 * 1000; // 1 hour
 	return token;
 };
-
 
 // Remove sensitive info when converting to JSON
 UserSchema.methods.toJSON = function () {
@@ -131,5 +133,5 @@ UserSchema.methods.toJSON = function () {
 module.exports = {
 	User: mongoose.model("User", UserSchema),
 	RefreshTokenSchema,
-	UserSchema
+	UserSchema,
 };

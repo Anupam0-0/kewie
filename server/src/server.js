@@ -67,8 +67,8 @@ app.get("/", (req, res) => {
 
 // Example protected route
 app.get("/protect", protect, (req, res) => {
-	console.log("Sup from protected Backend!");
-	res.send("Sup from protected Backend!");
+	console.log("Sup from protected Backend!", req.user);
+	res.json({ message: "Sup from protected Backend!", user: req.user });
 });
 
 // Global error handler middleware

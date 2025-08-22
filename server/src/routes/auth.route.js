@@ -1,5 +1,12 @@
 const router = require("express").Router();
 const { requireRole } = require("../middlewares/rbac.middleware");
+const { validateBody } = require("../middlewares/validation.middleware");
+const {
+	userRegistrationSchema,
+	userLoginSchema,
+	userUpdateSchema,
+	changePasswordSchema
+} = require("../utils/validationSchemas");
 
 const {
 	register,
@@ -13,13 +20,13 @@ const {
 const { protect } = require("../middlewares/auth.middleware");
 
 // Public routes
-router.post("/register", register);
-router.post("/login", login);
+router.post("/register", validateBody(userRegistrationSchema), register);
+router.post("/login", validateBody(userLoginSchema), login);
 
 // Protected routes
 router.get("/me", protect, me);
-router.put("/profile", protect, updateProfile);
-router.put("/change-password", protect, changePassword);
+router.put("/profile", protect, validateBody(userUpdateSchema), updateProfile);
+router.put("/change-password", protect, validateBody(changePasswordSchema), changePassword);
 router.post("/logout", protect, logout);
 router.get("/stats", protect, getUserStats);
 

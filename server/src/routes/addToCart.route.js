@@ -13,6 +13,14 @@ const {
 	getCartBySeller,
 } = require("../controllers/cart.controller");
 const { protect } = require("../middlewares/auth.middleware");
+const { validateBody, validateParams } = require("../middlewares/validation.middleware");
+const { 
+	cartAddSchema, 
+	cartUpdateQuantitySchema,
+	bulkCartSchema,
+	itemIdParamSchema,
+	sellerIdParamSchema 
+} = require("../utils/validationSchemas");
 
 const router = express.Router();
 
@@ -38,49 +46,49 @@ router.get("/stats", getCartStats);
  * @desc    Get cart items by seller
  * @access  Private (requires authentication)
  */
-router.get("/seller/:sellerId", getCartBySeller);
+router.get("/seller/:sellerId", validateParams(sellerIdParamSchema), getCartBySeller);
 
 /**
  * @route   GET /check/:itemId
  * @desc    Check if item is in cart
  * @access  Private (requires authentication)
  */
-router.get("/check/:itemId", checkCartStatus);
+router.get("/check/:itemId", validateParams(itemIdParamSchema), checkCartStatus);
 
 /**
  * @route   POST /
  * @desc    Add item to cart
  * @access  Private (requires authentication)
  */
-router.post("/", addToCart);
+router.post("/", validateBody(cartAddSchema), addToCart);
 
 /**
  * @route   POST /bulk
  * @desc    Bulk add items to cart
  * @access  Private (requires authentication)
  */
-router.post("/bulk", bulkAddToCart);
+router.post("/bulk", validateBody(bulkCartSchema), bulkAddToCart);
 
 /**
  * @route   PUT /:itemId/quantity
  * @desc    Update cart item quantity
  * @access  Private (requires authentication)
  */
-router.put("/:itemId/quantity", updateCartItemQuantity);
+router.put("/:itemId/quantity", validateParams(itemIdParamSchema), validateBody(cartUpdateQuantitySchema), updateCartItemQuantity);
 
 /**
  * @route   DELETE /:itemId
  * @desc    Remove item from cart
  * @access  Private (requires authentication)
  */
-router.delete("/:itemId", removeFromCart);
+router.delete("/:itemId", validateParams(itemIdParamSchema), removeFromCart);
 
 /**
  * @route   DELETE /bulk
  * @desc    Bulk remove items from cart
  * @access  Private (requires authentication)
  */
-router.delete("/bulk", bulkRemoveFromCart);
+router.delete("/bulk", validateBody(bulkCartSchema), bulkRemoveFromCart);
 
 /**
  * @route   DELETE /clear
@@ -94,6 +102,6 @@ router.delete("/clear", clearCart);
  * @desc    Move cart item to wishlist
  * @access  Private (requires authentication)
  */
-router.post("/:itemId/move-to-wishlist", moveToWishlist);
+router.post("/:itemId/move-to-wishlist", validateParams(itemIdParamSchema), moveToWishlist);
 
 module.exports = router;
