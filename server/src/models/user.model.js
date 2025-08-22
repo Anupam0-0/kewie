@@ -12,13 +12,79 @@ const RefreshTokenSchema = new mongoose.Schema({
 
 const UserSchema = new mongoose.Schema(
 	{
-		name: { type: String, required: true },
-		email: { type: String, unique: true, required: true },
-		password: { type: String, required: true },
-		phone: { type: String, required: true },
-		branch: String,
-		role: { type: String, enum: ["Student", "Admin"] },
-		isVerified: { type: Boolean, default: false },
+		name: {
+			type: String,
+			required: true,
+			trim: true,
+			minlength: 2,
+			maxlength: 50
+		},
+		email: {
+			type: String,
+			unique: true,
+			required: true,
+			lowercase: true,
+			trim: true,
+			// validate: {
+			// 	validator: function(v) {
+			// 		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+			// 	},
+			// 	message: 'Please enter a valid email address'
+			// }
+		},
+		password: {
+			type: String,
+			required: true,
+			minlength: 6
+		},
+		phone: {
+			type: String,
+			required: true,
+			trim: true,
+			// validate: {
+			// 	validator: function(v) {
+			// 		return /^\+?[\d\s\-\(\)]{10,}$/.test(v);
+			// 	},
+			// 	message: 'Please enter a valid phone number'
+			// }
+		},
+		branch: {
+			type: String,
+			trim: true
+		},
+		role: {
+			type: String,
+			enum: ["Student", "Admin"],
+			default: "Student"
+		},
+		isVerified: {
+			type: Boolean,
+			default: false
+		},
+		avatar: {
+			type: String,
+			// validate: {
+			// 	validator: function (v) {
+			// 		return !v || /^https?:\/\/.+/.test(v);
+			// 	},
+			// 	message: 'Avatar URL must be a valid HTTP/HTTPS URL'
+			// }
+		},
+		lastLogin: Date,
+		loginCount: {
+			type: Number,
+			default: 0
+		},
+		isActive: {
+			type: Boolean,
+			default: true
+		},
+
+		//  Add verification fields
+		// emailVerificationToken: String,
+		// emailVerificationExpires: Date,
+		// passwordResetToken: String,
+		// passwordResetExpires: Date
 	},
 	{
 		timestamps: true,
@@ -36,6 +102,23 @@ UserSchema.methods.comparePassword = async function (candidate) {
 	// console.log(candidate, this.password);
 	return bcrypt.compare(candidate, this.password);
 };
+
+// Add method to generate verification token
+UserSchema.methods.generateVerificationToken = function() {
+	const token = require('crypto').randomBytes(32).toString('hex');
+	this.emailVerificationToken = token;
+	this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+	return token;
+};
+
+// Add method to generate password reset token
+UserSchema.methods.generatePasswordResetToken = function() {
+	const token = require('crypto').randomBytes(32).toString('hex');
+	this.passwordResetToken = token;
+	this.passwordResetExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+	return token;
+};
+
 
 // Remove sensitive info when converting to JSON
 UserSchema.methods.toJSON = function () {

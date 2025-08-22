@@ -24,19 +24,58 @@ const itemSchema = new mongoose.Schema(
 		category: [
 			{ type: mongoose.Schema.Types.ObjectId, ref: "Category" }
 		],
-		title: { type: String, required: true },
-		description: String,
-		price: { type: Number, required: true },
+		title: {
+			type: String,
+			required: true,
+			trim: true,
+			maxlength: 200
+		},
+		description: {
+			type: String,
+			maxlength: 2000,
+			trim: true
+		},
+		price: {
+			type: Number,
+			required: true,
+			min: 0
+		},
 		status: {
 			type: String,
 			enum: ["available", "sold", "reserved"],
 			default: "available",
 		},
+		condition: {
+			type: String,
+			enum: ["new", "like-new", "good", "fair", "poor"],
+			required: true
+		},
+		negotiable: {
+			type: Boolean,
+			default: true
+		},
+		views: {
+			type: Number,
+			default: 0
+		},
+		category: [{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Category",
+			required: true
+		}]
 	},
 	{
 		timestamps: true,
 	}
 );
+
+// Add validation for category array
+itemSchema.pre('save', function (next) {
+	if (!this.category || this.category.length === 0) {
+		return next(new Error('At least one category is required'));
+	}
+	next();
+});
 
 const itemImageSchema = new mongoose.Schema(
 	{

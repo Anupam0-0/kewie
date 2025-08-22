@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
-const {User} = require("../models/user.model");
+const { User } = require("../models/user.model");
 const { verifyAccess } = require("../utils/generateToken");
 
 // Verify access token from Authorization header
@@ -31,7 +31,7 @@ const protect = async (req, res, next) => {
 		req.user = user; // attach user doc
 		next();
 	} catch (err) {
-		return res.status(401).json({ error: "Invalid token", message : err.message });
+		return res.status(401).json({ error: "Invalid token", message: err.message });
 	}
 };
 
