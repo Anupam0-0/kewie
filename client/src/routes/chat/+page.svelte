@@ -1,0 +1,1 @@
+this is a chat page with sidebar and chat interface
